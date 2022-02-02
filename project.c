@@ -3,40 +3,22 @@
 #include "random.h"
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
+#include "dev/serial-line.h"
 #include <stdio.h>
 
-PROCESS(example_broadcast_process, "Broadcast example");
-AUTOSTART_PROCESSES(&example_broadcast_process);
+PROCESS(command_receiver, "Receive commands over serial");
+AUTOSTART_PROCESSES(&command_receiver);
 
-static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
-    printf("broadcast message received from %d.%d: '%s'\n", 
-           from->u8[0], from->u8[1], (char *)packetbuf_dataptr());
-}
-
-static const struct broadcast_callbacks broadcast_cb = {broadcast_recv};
-
-static struct broadcast_conn broadcast;
-
-PROCESS_THREAD(example_broadcast_process, ev, data) {
-    static struct etimer et;
-    
-    PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
+PROCESS_THREAD(command_receiver, ev, data) {
     PROCESS_BEGIN();
-    
-    broadcast_open(&broadcast, 129, &broadcast_cb);
-    
-    while(1) {
-        unsigned long ticks = CLOCK_SECOND * 2 + random_rand() % (CLOCK_SECOND * 2);
-        
-        etimer_set(&et, ticks);
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-        
-        packetbuf_copyfrom("Hello", 6);
-        
-        broadcast_send(&broadcast);
-        
-        printf("broadcast packet sent\n");
+
+    for(;;) {
+        PROCESS_WAIT_EVENT();
+
+        if(ev == serial_line_event_message && data != NULL) {
+            printf("received command: '%s'\n", (const char*)data);
+        }
     }
-    
+
     PROCESS_END();
 }
