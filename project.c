@@ -14,6 +14,12 @@ typedef enum {
     RREQ,
 } AodvType;
 
+typedef struct {
+    uint8_t source_address;
+    uint8_t destination_address;
+    uint8_t ttl;
+} AodvRreq;
+
 
 static struct broadcast_conn broadcast;
 
@@ -33,13 +39,13 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
 static const struct broadcast_callbacks broadcast_cb = {broadcast_recv};
 
 
-static int send_rreq(uint8_t source_address, uint8_t destination_address, uint8_t ttl) {
-    static uint8_t buffer[4];
+static int send_rreq(AodvRreq *rreq) {
+    static uint8_t buffer[sizeof(AodvRreq) + 1];
 
     buffer[0] = RREQ;
-    buffer[1] = source_address;
-    buffer[2] = destination_address;
-    buffer[3] = ttl;
+    buffer[1] = rreq->source_address;
+    buffer[2] = rreq->destination_address;
+    buffer[3] = rreq->ttl;
 
     packetbuf_copyfrom(buffer, sizeof(buffer));
     return broadcast_send(&broadcast);
@@ -69,10 +75,13 @@ PROCESS_THREAD(init, ev, data) {
 
         if(strcmp(command, "rreq") == 0) {
             // Send RREQ to node with specified ID
-            static char *id;
-            id = strtok(NULL, " ");
-            printf("Sending RREQ to %s\n", id);
-            send_rreq(linkaddr_node_addr.u8[0], atoi(id), AODV_RREQ_TTL);
+            static AodvRreq rreq;
+            rreq.source_address = linkaddr_node_addr.u8[0];
+            rreq.destination_address = atoi(strtok(NULL, " "));
+            rreq.ttl = AODV_RREQ_TTL;
+
+            printf("Sending RREQ to %d\n", rreq.destination_address);
+            send_rreq(&rreq);
         }
     }
 
