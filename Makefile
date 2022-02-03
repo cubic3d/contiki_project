@@ -6,6 +6,8 @@ ifndef TARGET
 TARGET=sky
 endif
 
+PROJECT_SOURCEFILES+=aodv.c
+
 all: project.sky
 
 upload: project.upload
