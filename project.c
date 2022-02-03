@@ -54,7 +54,7 @@ PROCESS_THREAD(init, ev, data) {
 
     // Init routing table
     static uint8_t i;
-    for(i = 0; i < sizeof(routing_table); i++) {
+    for(i = 0; i < sizeof(routing_table) / sizeof(routing_table[0]); i++) {
         routing_table[i].in_use = false;
     }
 
