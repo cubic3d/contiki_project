@@ -7,21 +7,19 @@
 #include "dev/serial-line.h"
 #include <stdio.h>
 
-PROCESS(command_receiver, "Receive commands over serial");
-AUTOSTART_PROCESSES(&command_receiver);
+PROCESS(button_handler, "Handle button");
+AUTOSTART_PROCESSES(&button_handler);
 
-PROCESS_THREAD(command_receiver, ev, data) {
+PROCESS_THREAD(button_handler, ev, data) {
     PROCESS_BEGIN();
 
     uart1_set_input(serial_line_input_byte);
     serial_line_init();
 
     for(;;) {
-        PROCESS_WAIT_EVENT();
+        PROCESS_WAIT_EVENT_UNTIL(ev == sensors_event && data == &button_sensor);
 
-        if(ev == serial_line_event_message && data != NULL) {
-            printf("received command: '%s'\n", (const char*)data);
-        }
+        printf("Button pressed!\n");
     }
 
     PROCESS_END();
