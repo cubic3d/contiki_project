@@ -64,7 +64,7 @@
       </interface_config>
       <interface_config>
         org.contikios.cooja.mspmote.interfaces.MspSerial
-        <history>l~;test~;</history>
+        <history>test~;l~;test~;</history>
       </interface_config>
       <motetype_identifier>sky1</motetype_identifier>
     </mote>
@@ -101,7 +101,7 @@
       <coloring />
     </plugin_config>
     <width>1220</width>
-    <z>1</z>
+    <z>2</z>
     <height>509</height>
     <location_x>400</location_x>
     <location_y>160</location_y>
@@ -137,11 +137,11 @@
     org.contikios.cooja.plugins.MoteInterfaceViewer
     <mote_arg>0</mote_arg>
     <plugin_config>
-      <interface>Button</interface>
+      <interface>Serial port</interface>
       <scrollpos>0,0</scrollpos>
     </plugin_config>
     <width>400</width>
-    <z>2</z>
+    <z>1</z>
     <height>272</height>
     <location_x>2</location_x>
     <location_y>399</location_y>
