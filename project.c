@@ -21,14 +21,14 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
     switch(*data) {
         case RREQ:;
             static AodvRreq *rreq;
-            rreq = receive_rreq(&data[1]);
+            rreq = aodv_receive_rreq(&data[1]);
 
             printf("Received RREQ from %d to %d, TTL: %d\n", rreq->source_address, rreq->destination_address, rreq->ttl);
 
             // Flood as long as packet is alive
             if(rreq->ttl > 0) {
                 rreq->ttl--;
-                send_rreq(&broadcast, rreq);
+                aodv_send_rreq(&broadcast, rreq);
             }
             break;
 
@@ -68,7 +68,7 @@ PROCESS_THREAD(init, ev, data) {
             rreq.ttl = AODV_RREQ_TTL;
 
             printf("Sending RREQ to %d\n", rreq.destination_address);
-            send_rreq(&broadcast, &rreq);
+            aodv_send_rreq(&broadcast, &rreq);
         }
     }
 

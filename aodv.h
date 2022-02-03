@@ -17,7 +17,7 @@ typedef struct {
 } AodvRreq;
 
 
-int send_rreq(struct broadcast_conn *bc, AodvRreq *rreq);
-AodvRreq *receive_rreq(uint8_t *data);
+int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq);
+AodvRreq *aodv_receive_rreq(uint8_t *data);
 
 #endif
