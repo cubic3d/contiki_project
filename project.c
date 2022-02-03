@@ -6,6 +6,7 @@
 #include "dev/uart1.h"
 #include "dev/serial-line.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #define AODV_RREQ_TTL 10
 
