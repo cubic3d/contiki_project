@@ -10,6 +10,11 @@
 #include <stdlib.h>
 
 
+// Very primitive static table, inefficient but fine for the project.
+// Max nodes supported is 265, but no hashing required and operations are O(1).
+static AodvRoutingEntry routing_table[256];
+
+
 static struct broadcast_conn broadcast;
 
 // Handle incomming broadcast packets.
@@ -46,6 +51,12 @@ PROCESS_THREAD(init, ev, data) {
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
 
     PROCESS_BEGIN();
+
+    // Init routing table
+    static uint8_t i;
+    for(i = 0; i < sizeof(routing_table); i++) {
+        routing_table[i].in_use = false;
+    }
 
     // Hook UART1 to serial line API
     uart1_set_input(serial_line_input_byte);

@@ -3,8 +3,16 @@
 
 #include <stdint.h>
 #include "broadcast.h"
+#include <stdbool.h>
 
 #define AODV_RREQ_TTL 10
+
+typedef struct {
+    bool in_use;
+    uint8_t destination;
+    uint8_t next_hop;
+    uint8_t distance;
+} AodvRoutingEntry;
 
 typedef enum {
     RREQ,
