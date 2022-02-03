@@ -23,7 +23,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
             static AodvRreq *rreq;
             rreq = receive_rreq(&data[1]);
 
-            printf("TTL: %d\n", rreq->ttl);
+            printf("Received RREQ from %d to %d, TTL: %d\n", rreq->source_address, rreq->destination_address, rreq->ttl);
 
             // Flood as long as packet is alive
             if(rreq->ttl > 0) {
