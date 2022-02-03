@@ -32,13 +32,13 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
 static const struct broadcast_callbacks broadcast_cb = {broadcast_recv};
 
 
-static int send_rreq(uint8_t destination_address) {
+static int send_rreq(uint8_t source_address, uint8_t destination_address, uint8_t ttl) {
     static uint8_t buffer[4];
 
     buffer[0] = RREQ;
-    buffer[1] = linkaddr_node_addr.u8[0];
+    buffer[1] = source_address;
     buffer[2] = destination_address;
-    buffer[3] = AODV_RREQ_TTL;
+    buffer[3] = ttl;
 
     packetbuf_copyfrom(buffer, sizeof(buffer));
     return broadcast_send(&broadcast);
@@ -71,7 +71,7 @@ PROCESS_THREAD(init, ev, data) {
             static char *id;
             id = strtok(NULL, " ");
             printf("Sending RREQ to %s\n", id);
-            send_rreq(atoi(id));
+            send_rreq(linkaddr_node_addr.u8[0], atoi(id), AODV_RREQ_TTL);
         }
     }
 
