@@ -64,7 +64,25 @@
       </interface_config>
       <interface_config>
         org.contikios.cooja.mspmote.interfaces.MspSerial
-        <history>test~;l~;test~;</history>
+        <history>test~;</history>
+      </interface_config>
+      <motetype_identifier>sky1</motetype_identifier>
+    </mote>
+    <mote>
+      <breakpoints />
+      <interface_config>
+        org.contikios.cooja.interfaces.Position
+        <x>40.52902000113286</x>
+        <y>95.21911123315911</y>
+        <z>0.0</z>
+      </interface_config>
+      <interface_config>
+        org.contikios.cooja.mspmote.interfaces.MspClock
+        <deviation>1.0</deviation>
+      </interface_config>
+      <interface_config>
+        org.contikios.cooja.mspmote.interfaces.MspMoteID
+        <id>2</id>
       </interface_config>
       <motetype_identifier>sky1</motetype_identifier>
     </mote>
@@ -85,10 +103,10 @@
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.TrafficVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>1.0909090909090917 0.0 0.0 1.0909090909090917 182.2667266143277 82.26024987208861</viewport>
+      <viewport>1.6958217782173945 0.0 0.0 1.6958217782173945 173.692125366848 26.728644727739315</viewport>
     </plugin_config>
     <width>400</width>
-    <z>3</z>
+    <z>2</z>
     <height>400</height>
     <location_x>1</location_x>
     <location_y>1</location_y>
@@ -101,7 +119,7 @@
       <coloring />
     </plugin_config>
     <width>1220</width>
-    <z>2</z>
+    <z>3</z>
     <height>509</height>
     <location_x>400</location_x>
     <location_y>160</location_y>
@@ -110,6 +128,7 @@
     org.contikios.cooja.plugins.TimeLine
     <plugin_config>
       <mote>0</mote>
+      <mote>1</mote>
       <showRadioRXTX />
       <showRadioHW />
       <showLEDs />
