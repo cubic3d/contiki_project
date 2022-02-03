@@ -9,7 +9,6 @@
 
 typedef struct {
     bool in_use;
-    uint8_t destination;
     uint8_t next_hop;
     uint8_t distance;
 } AodvRoutingEntry;
