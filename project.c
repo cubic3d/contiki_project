@@ -24,6 +24,12 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
             rreq = receive_rreq(&data[1]);
 
             printf("TTL: %d\n", rreq->ttl);
+
+            // Flood as long as packet is alive
+            if(rreq->ttl > 0) {
+                rreq->ttl--;
+                send_rreq(&broadcast, rreq);
+            }
             break;
 
         default:
