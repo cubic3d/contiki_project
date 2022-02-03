@@ -7,18 +7,46 @@
 #include "dev/serial-line.h"
 #include <stdio.h>
 
-PROCESS(init, "Main process and command handler");
-AUTOSTART_PROCESSES(&init);
+#define AODV_RREQ_TTL 10
+
+typedef enum {
+    RREQ,
+} AodvType;
 
 
 static struct broadcast_conn broadcast;
 
 static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
-    printf("broadcast message received from %d.%d: '%s'\n", 
-           from->u8[0], from->u8[1], (char *)packetbuf_dataptr());
+    static uint8_t *data;
+    data = (uint8_t *)packetbuf_dataptr();
+
+    // Handle packet depending on its type
+    switch(*data) {
+        case RREQ:
+            printf("TTL: %d\n", data[3]);
+            break;
+        default:
+            printf("Received unknown packet type %d", data[0]);
+    }
 }
 static const struct broadcast_callbacks broadcast_cb = {broadcast_recv};
 
+
+static int send_rreq(uint8_t destination_address) {
+    static uint8_t buffer[4];
+
+    buffer[0] = RREQ;
+    buffer[1] = linkaddr_node_addr.u8[0];
+    buffer[2] = destination_address;
+    buffer[3] = AODV_RREQ_TTL;
+
+    packetbuf_copyfrom(buffer, sizeof(buffer));
+    return broadcast_send(&broadcast);
+}
+
+
+PROCESS(init, "Main process and command handler");
+AUTOSTART_PROCESSES(&init);
 
 PROCESS_THREAD(init, ev, data) {
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
@@ -35,14 +63,15 @@ PROCESS_THREAD(init, ev, data) {
         PROCESS_WAIT_EVENT_UNTIL(ev == serial_line_event_message && data != NULL);
 
         // Extract command by separating received line by " "
-        char *command = strtok((char*)data, " ");
+        static char *command;
+        command = strtok((char*)data, " ");
 
         if(strcmp(command, "rreq") == 0) {
             // Send RREQ to node with specified ID
-            char *id = strtok(NULL, " ");
+            static char *id;
+            id = strtok(NULL, " ");
             printf("Sending RREQ to %s\n", id);
-            packetbuf_copyfrom("Hello", 6);
-            broadcast_send(&broadcast);
+            send_rreq(atoi(id));
         }
     }
 
