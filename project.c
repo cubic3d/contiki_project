@@ -11,8 +11,9 @@
 
 
 // Very primitive static table, inefficient but fine for the project.
-// Max nodes supported is 265, but no hashing required and operations are O(1).
-static AodvRoutingEntry routing_table[256];
+// Max nodes supported is 50, but no hashing required and operations are O(1).
+// Size of 256 will already cause boot loops on motes.
+static AodvRoutingEntry routing_table[50];
 
 
 static struct broadcast_conn broadcast;
@@ -29,6 +30,18 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
             rreq = aodv_receive_rreq(&data[1]);
 
             printf("Received RREQ from %d to %d, TTL: %d\n", rreq->source_address, rreq->destination_address, rreq->ttl);
+
+            // Update routing table based on the RREQ, if it's not our own
+            if(rreq->source_address != linkaddr_node_addr.u8[0]) {
+                routing_table[rreq->source_address].in_use = true;
+                routing_table[rreq->source_address].next_hop = from->u8[0];
+                routing_table[rreq->source_address].distance = AODV_RREQ_TTL - rreq->ttl + 1;
+            }
+
+            // Update routing table based on the packet source
+            routing_table[from->u8[0]].in_use = true;
+            routing_table[from->u8[0]].next_hop = from->u8[0];
+            routing_table[from->u8[0]].distance = 1;
 
             // Flood as long as packet is alive
             if(rreq->ttl > 0) {
@@ -80,6 +93,16 @@ PROCESS_THREAD(init, ev, data) {
 
             printf("Sending RREQ to %d\n", rreq.destination_address);
             aodv_send_rreq(&broadcast, &rreq);
+        } else if(strcmp(command, "print_table") == 0) {
+            printf("----------------------------\n");
+            printf("%-15s%-15s%-15s\n", "Destination", "Next Hop", "Distance");
+            static uint8_t i;
+            for(i = 0; i < sizeof(routing_table) / sizeof(routing_table[0]); i++) {
+                if(routing_table[i].in_use) {
+                    printf("%-15d%-15d%-15d\n", i, routing_table[i].next_hop, routing_table[i].distance);
+                }
+            }
+            printf("----------------------------\n");
         }
     }
 
