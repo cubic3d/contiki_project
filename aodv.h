@@ -47,7 +47,7 @@ AodvRreq *aodv_receive_rreq(uint8_t *data);
 void aodv_print_rreq(const char* action, AodvRreq *rreq);
 
 int aodv_send_rrep(struct unicast_conn *uc, AodvRrep *rrep);
-int aodv_send_rrep2(struct unicast_conn *uc, AodvRreq *rreq);
+int aodv_send_rrep2(struct unicast_conn *uc, AodvRreq *rreq, uint8_t hop_count_init);
 AodvRrep *aodv_receive_rrep(uint8_t *data);
 void aodv_print_rrep(const char* action, AodvRrep *rrep);
 
