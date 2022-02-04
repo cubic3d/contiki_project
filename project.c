@@ -75,7 +75,7 @@ PROCESS_THREAD(init, ev, data) {
             static uint8_t destination_address;
             destination_address = atoi(strtok(NULL, " "));
 
-            printf("Sending RREQ to %d\n", destination_address);
+            printf("Sending RREQ for %d\n", destination_address);
             aodv_send_rreq2(&broadcast, destination_address);
         } else if(strcmp(command, "pt") == 0) {
             aodv_routing_table_print();
