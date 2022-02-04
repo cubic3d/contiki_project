@@ -10,12 +10,6 @@
 #include <stdlib.h>
 
 
-// Very primitive static table, inefficient but fine for the project.
-// Max nodes supported is 50, but no hashing required and operations are O(1).
-// Size of 256 will already cause boot loops on motes.
-static AodvRoutingEntry routing_table[AODV_RT_SIZE];
-
-
 static struct broadcast_conn broadcast;
 
 // Handle incomming broadcast packets.
@@ -31,17 +25,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
 
             printf("Received RREQ from %d to %d, TTL: %d\n", rreq->source_address, rreq->destination_address, rreq->ttl);
 
-            // Update routing table based on the RREQ, if it's not our own
-            if(rreq->source_address != linkaddr_node_addr.u8[0]) {
-                routing_table[rreq->source_address].in_use = true;
-                routing_table[rreq->source_address].next_hop = from->u8[0];
-                routing_table[rreq->source_address].distance = AODV_RREQ_TTL - rreq->ttl + 1;
-            }
-
-            // Update routing table based on the packet source
-            routing_table[from->u8[0]].in_use = true;
-            routing_table[from->u8[0]].next_hop = from->u8[0];
-            routing_table[from->u8[0]].distance = 1;
+            aodv_routing_table_update(from->u8[0], rreq);
 
             // Flood as long as packet is alive
             if(rreq->ttl > 0) {
@@ -65,7 +49,7 @@ PROCESS_THREAD(init, ev, data) {
 
     PROCESS_BEGIN();
 
-    aodv_routing_table_init(routing_table);
+    aodv_routing_table_init();
 
     // Hook UART1 to serial line API
     uart1_set_input(serial_line_input_byte);
@@ -90,7 +74,7 @@ PROCESS_THREAD(init, ev, data) {
             printf("Sending RREQ to %d\n", rreq.destination_address);
             aodv_send_rreq(&broadcast, &rreq);
         } else if(strcmp(command, "pt") == 0) {
-            aodv_routing_table_print(routing_table);
+            aodv_routing_table_print();
         }
     }
 

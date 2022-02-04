@@ -28,8 +28,8 @@ typedef struct {
 int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq);
 AodvRreq *aodv_receive_rreq(uint8_t *data);
 
-void aodv_routing_table_init(AodvRoutingEntry *rt);
-void aodv_routing_table_print(AodvRoutingEntry *rt);
-
+void aodv_routing_table_init();
+void aodv_routing_table_print();
+void aodv_routing_table_update(uint8_t from, AodvRreq *rreq);
 
 #endif
