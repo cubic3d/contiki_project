@@ -130,9 +130,26 @@ int aodv_send_rrep2(struct unicast_conn *uc, AodvRreq *rreq) {
     return aodv_send_rrep(uc, &rrep);
 }
 
-AodvRrep *aodv_receive_rrep(uint8_t *data);
+AodvRrep *aodv_receive_rrep(uint8_t *data) {
+    static AodvRrep rrep;
+    
+    rrep.distance = data[1];
+    rrep.source_address = data[2];
+    rrep.destination_address = data[3];
+    rrep.destination_sequence_number = data[4];
 
-void aodv_print_rrep(const char* action, AodvRrep *rrep);
+    aodv_print_rrep("Recv", &rrep);
+    return &rrep;
+}
+
+void aodv_print_rrep(const char* action, AodvRrep *rrep) {
+    printf("%s RREP: Distance: %d | Source: %d | Destination: %d/%d\n",
+        action,
+        rrep->distance,
+        rrep->source_address,
+        rrep->destination_address,
+        rrep->destination_sequence_number);
+}
 
 void aodv_routing_table_init() {
     static uint8_t i;
