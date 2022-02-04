@@ -13,7 +13,7 @@
 // Very primitive static table, inefficient but fine for the project.
 // Max nodes supported is 50, but no hashing required and operations are O(1).
 // Size of 256 will already cause boot loops on motes.
-static AodvRoutingEntry routing_table[50];
+static AodvRoutingEntry routing_table[AODV_RT_SIZE];
 
 
 static struct broadcast_conn broadcast;
@@ -90,15 +90,7 @@ PROCESS_THREAD(init, ev, data) {
             printf("Sending RREQ to %d\n", rreq.destination_address);
             aodv_send_rreq(&broadcast, &rreq);
         } else if(strcmp(command, "print_table") == 0) {
-            printf("----------------------------\n");
-            printf("%-15s%-15s%-15s\n", "Destination", "Next Hop", "Distance");
-            static uint8_t i;
-            for(i = 0; i < sizeof(routing_table) / sizeof(routing_table[0]); i++) {
-                if(routing_table[i].in_use) {
-                    printf("%-15d%-15d%-15d\n", i, routing_table[i].next_hop, routing_table[i].distance);
-                }
-            }
-            printf("----------------------------\n");
+            aodv_routing_table_print(routing_table);
         }
     }
 

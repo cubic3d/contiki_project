@@ -1,5 +1,6 @@
 #include "aodv.h"
 #include "net/rime/rime.h"
+#include <stdio.h>
 
 int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq) {
     static uint8_t buffer[sizeof(AodvRreq) + 1];
@@ -24,7 +25,19 @@ AodvRreq *aodv_receive_rreq(uint8_t *data) {
 
 void aodv_routing_table_init(AodvRoutingEntry *rt) {
     static uint8_t i;
-    for(i = 0; i < sizeof(rt) / sizeof(rt[0]); i++) {
+    for(i = 0; i < AODV_RT_SIZE; i++) {
         rt[i].in_use = false;
     }
+}
+
+void aodv_routing_table_print(AodvRoutingEntry *rt) {
+    printf("----------------------------\n");
+    printf("%-15s%-15s%-15s\n", "Destination", "Next Hop", "Distance");
+    static uint8_t i;
+    for(i = 0; i < AODV_RT_SIZE; i++) {
+        if(rt[i].in_use) {
+            printf("%-15d%-15d%-15d\n", i, rt[i].next_hop, rt[i].distance);
+        }
+    }
+    printf("----------------------------\n");
 }
