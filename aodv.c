@@ -30,7 +30,7 @@ int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq) {
     static uint8_t buffer[sizeof(AodvRreq) + 1];
 
     buffer[0] = RREQ;
-    buffer[1] = (rreq->unknown_sequence_number << 1);
+    buffer[1] = (rreq->unknown_sequence_number << 0);
     buffer[2] = rreq->id;
     buffer[3] = rreq->source_address;
     buffer[4] = rreq->source_sequence_number;
