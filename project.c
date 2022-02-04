@@ -36,8 +36,6 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
                 break;
             }
 
-            printf("Received RREQ from %d to %d, TTL: %d\n", rreq->source_address, rreq->destination_address, rreq->ttl);
-
             aodv_routing_table_update_source(from->u8[0], rreq);
 
             // Flood as long as packet is alive
@@ -80,7 +78,6 @@ PROCESS_THREAD(init, ev, data) {
             static uint8_t destination_address;
             destination_address = atoi(strtok(NULL, " "));
 
-            printf("Sending RREQ for %d\n", destination_address);
             aodv_send_rreq2(&broadcast, destination_address);
         } else if(strcmp(command, "pt") == 0) {
             aodv_routing_table_print();

@@ -39,6 +39,7 @@ int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq) {
     buffer[7] = rreq->ttl;
 
     packetbuf_copyfrom(buffer, sizeof(buffer));
+    aodv_print_rreq("Send", rreq);
     return broadcast_send(bc);
 }
 
@@ -77,7 +78,20 @@ AodvRreq *aodv_receive_rreq(uint8_t *data) {
     rreq.destination_sequence_number = data[6];
     rreq.ttl = data[7];
 
+    aodv_print_rreq("Recv", &rreq);
     return &rreq;
+}
+
+void aodv_print_rreq(const char* action, AodvRreq *rreq) {
+    printf("%s RREQ: ID: %d | Source: %d/%d | Destination: %d/%d/%s | TTL: %d\n",
+        action,
+        rreq->id,
+        rreq->source_address,
+        rreq->source_sequence_number,
+        rreq->destination_address,
+        rreq->destination_sequence_number,
+        rreq->unknown_sequence_number ? "unknown" : "known  ",
+        rreq->ttl);
 }
 
 void aodv_routing_table_init() {
@@ -119,6 +133,7 @@ void aodv_routing_table_update_prev_hop(uint8_t from, AodvRreq *rreq) {
     routing_table[from].next_hop = from;
     routing_table[from].sequence_number = 0;
     routing_table[from].valid_sequence_number = false;
+    printf("Added route to %d via %d, reason: direct neighbor, previous hop rule\n", from, from);
 }
 
 void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq) {
@@ -134,10 +149,12 @@ void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq) {
 
             if(sequence_diff > 0) {
                 update = true;
+                printf("Added route to %d via %d, reason: newer sequence number\n", rreq->source_address, from);
             } else if(sequence_diff == 0) {
                 // Equal sequence, compare distance and update if new is lower
                 if(AODV_RREQ_TTL - rreq->ttl + 1 < routing_table[rreq->source_address].distance) {
                     update = true;
+                    printf("Added route to %d via %d, reason: shorter distance\n", rreq->source_address, from);
                 } else {
                     update = false;
                 }
@@ -146,9 +163,11 @@ void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq) {
             }
         } else {
             update = true;
+            printf("Added route to %d via %d, reason: invalid sequence number\n", rreq->source_address, from);
         }
     } else {
         update = true;
+        printf("Added route to %d via %d, reason: not existent\n", rreq->source_address, from);
     }
 
     // Update routing table based on the packet source

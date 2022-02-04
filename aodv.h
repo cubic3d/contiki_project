@@ -35,6 +35,7 @@ int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq);
 int aodv_send_rreq2(struct broadcast_conn *bc, uint8_t destination_address);
 bool aodv_seen_rreq(AodvRreq *rreq);
 AodvRreq *aodv_receive_rreq(uint8_t *data);
+void aodv_print_rreq(const char* action, AodvRreq *rreq);
 
 void aodv_routing_table_init();
 void aodv_routing_table_print();
