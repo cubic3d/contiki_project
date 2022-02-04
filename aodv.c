@@ -106,7 +106,7 @@ int aodv_send_rrep(struct unicast_conn *uc, AodvRrep *rrep) {
     static uint8_t buffer[sizeof(AodvRrep) + 1];
 
     buffer[0] = RREP;
-    buffer[1] = rrep->distance;
+    buffer[1] = rrep->hop_count;
     buffer[2] = rrep->source_address;
     buffer[3] = rrep->destination_address;
     buffer[4] = rrep->destination_sequence_number;
@@ -124,7 +124,7 @@ int aodv_send_rrep(struct unicast_conn *uc, AodvRrep *rrep) {
 int aodv_send_rrep2(struct unicast_conn *uc, AodvRreq *rreq) {
     static AodvRrep rrep;
 
-    rrep.distance = AODV_RREQ_TTL - rreq->ttl + 1;
+    rrep.hop_count = 0;
     rrep.source_address = rreq->source_address;
     rrep.destination_address = rreq->destination_address;
     rrep.destination_sequence_number = rreq->destination_sequence_number;
@@ -135,7 +135,7 @@ int aodv_send_rrep2(struct unicast_conn *uc, AodvRreq *rreq) {
 AodvRrep *aodv_receive_rrep(uint8_t *data) {
     static AodvRrep rrep;
     
-    rrep.distance = data[1];
+    rrep.hop_count = data[1];
     rrep.source_address = data[2];
     rrep.destination_address = data[3];
     rrep.destination_sequence_number = data[4];
@@ -145,9 +145,9 @@ AodvRrep *aodv_receive_rrep(uint8_t *data) {
 }
 
 void aodv_print_rrep(const char* action, AodvRrep *rrep) {
-    printf("%s RREP: Distance: %d | Source: %d | Destination: %d/%d\n",
+    printf("%s RREP: Hop Count: %d | Source: %d | Destination: %d/%d\n",
         action,
-        rrep->distance,
+        rrep->hop_count,
         rrep->source_address,
         rrep->destination_address,
         rrep->destination_sequence_number);

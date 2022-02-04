@@ -33,7 +33,7 @@ typedef struct {
 } AodvRreq;
 
 typedef struct {
-    uint8_t distance;
+    uint8_t hop_count;
     uint8_t source_address;
     uint8_t destination_address;
     uint8_t destination_sequence_number;
