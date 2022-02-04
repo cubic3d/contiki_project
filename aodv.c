@@ -176,6 +176,6 @@ void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq) {
         routing_table[rreq->source_address].distance = AODV_RREQ_TTL - rreq->ttl + 1;
         routing_table[rreq->source_address].next_hop = from;
         routing_table[rreq->source_address].sequence_number = rreq->source_sequence_number;
-        routing_table[rreq->source_address].valid_sequence_number = !rreq->unknown_sequence_number;
+        routing_table[rreq->source_address].valid_sequence_number = true;
     }
 }
