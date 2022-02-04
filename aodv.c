@@ -112,16 +112,51 @@ void aodv_routing_table_print() {
     printf("----------------------------\n");
 }
 
-void aodv_routing_table_update(uint8_t from, AodvRreq *rreq) {
-    // Update routing table based on the RREQ, if it's not our own
-    if(rreq->source_address != linkaddr_node_addr.u8[0]) {
-        routing_table[rreq->source_address].in_use = true;
-        routing_table[rreq->source_address].next_hop = from;
-        routing_table[rreq->source_address].distance = AODV_RREQ_TTL - rreq->ttl + 1;
+void aodv_routing_table_update_prev_hop(uint8_t from, AodvRreq *rreq) {
+    // Directly update the table, as this information is current in any case
+    routing_table[from].in_use = true;
+    routing_table[from].distance = 1;
+    routing_table[from].next_hop = from;
+    routing_table[from].sequence_number = 0;
+    routing_table[from].valid_sequence_number = false;
+}
+
+void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq) {
+    static bool update = false;
+
+    // Determine if we should update the route, trying to be explicit
+    if(routing_table[rreq->source_address].in_use) {
+        if(routing_table[rreq->source_address].valid_sequence_number) {
+            // Compare sequence numbers
+            // This casts the result into signed integer as per RFC to accomplish smooth rollover
+            static int8_t sequence_diff;
+            sequence_diff = rreq->source_sequence_number - routing_table[rreq->source_address].sequence_number + 1;
+
+            if(sequence_diff > 0) {
+                update = true;
+            } else if(sequence_diff == 0) {
+                // Equal sequence, compare distance and update if new is lower
+                if(AODV_RREQ_TTL - rreq->ttl + 1 < routing_table[rreq->source_address].distance) {
+                    update = true;
+                } else {
+                    update = false;
+                }
+            } else {
+                update = false;
+            }
+        } else {
+            update = true;
+        }
+    } else {
+        update = true;
     }
 
     // Update routing table based on the packet source
-    routing_table[from].in_use = true;
-    routing_table[from].next_hop = from;
-    routing_table[from].distance = 1;
+    if(update) {
+        routing_table[rreq->source_address].in_use = true;
+        routing_table[rreq->source_address].distance = AODV_RREQ_TTL - rreq->ttl + 1;
+        routing_table[rreq->source_address].next_hop = from;
+        routing_table[rreq->source_address].sequence_number = rreq->source_sequence_number;
+        routing_table[rreq->source_address].valid_sequence_number = !rreq->unknown_sequence_number;
+    }
 }

@@ -29,6 +29,8 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
             static AodvRreq *rreq;
             rreq = aodv_receive_rreq(data);
 
+            aodv_routing_table_update_prev_hop(from->u8[0], rreq);
+
             // Drop RREQ if already seen
             if(aodv_seen_rreq(rreq)) {
                 break;
@@ -36,7 +38,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
 
             printf("Received RREQ from %d to %d, TTL: %d\n", rreq->source_address, rreq->destination_address, rreq->ttl);
 
-            aodv_routing_table_update(from->u8[0], rreq);
+            aodv_routing_table_update_source(from->u8[0], rreq);
 
             // Flood as long as packet is alive
             rreq->ttl--;

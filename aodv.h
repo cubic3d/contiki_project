@@ -38,6 +38,7 @@ AodvRreq *aodv_receive_rreq(uint8_t *data);
 
 void aodv_routing_table_init();
 void aodv_routing_table_print();
-void aodv_routing_table_update(uint8_t from, AodvRreq *rreq);
+void aodv_routing_table_update_prev_hop(uint8_t from, AodvRreq *rreq);
+void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq);
 
 #endif
