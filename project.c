@@ -1,3 +1,9 @@
+/*
+This project does not fully implement https://www.rfc-editor.org/rfc/rfc3561 but leans
+on the basic concepts from the lecture. Counter/Number/Address sizes are chosen to be limited
+the datatype, since it's sufficient as a demonstration.
+*/
+
 #include "contiki.h"
 #include "net/rime/rime.h"
 #include "random.h"
@@ -21,7 +27,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
     switch(*data) {
         case RREQ:;
             static AodvRreq *rreq;
-            rreq = aodv_receive_rreq(&data[1]);
+            rreq = aodv_receive_rreq(data);
 
             printf("Received RREQ from %d to %d, TTL: %d\n", rreq->source_address, rreq->destination_address, rreq->ttl);
 
@@ -66,13 +72,11 @@ PROCESS_THREAD(init, ev, data) {
 
         if(strcmp(command, "rreq") == 0) {
             // Send RREQ to node with specified ID
-            static AodvRreq rreq;
-            rreq.source_address = linkaddr_node_addr.u8[0];
-            rreq.destination_address = atoi(strtok(NULL, " "));
-            rreq.ttl = AODV_RREQ_TTL;
+            static uint8_t destination_address;
+            destination_address = atoi(strtok(NULL, " "));
 
-            printf("Sending RREQ to %d\n", rreq.destination_address);
-            aodv_send_rreq(&broadcast, &rreq);
+            printf("Sending RREQ to %d\n", destination_address);
+            aodv_send_rreq2(&broadcast, destination_address);
         } else if(strcmp(command, "pt") == 0) {
             aodv_routing_table_print();
         }

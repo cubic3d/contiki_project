@@ -12,6 +12,8 @@ typedef struct {
     bool in_use;
     uint8_t next_hop;
     uint8_t distance;
+    uint8_t sequence_number;
+    bool valid_sequence_number;
 } AodvRoutingEntry;
 
 typedef enum {
@@ -19,13 +21,18 @@ typedef enum {
 } AodvType;
 
 typedef struct {
+    uint8_t id;
     uint8_t source_address;
+    uint8_t source_sequence_number;
     uint8_t destination_address;
+    uint8_t destination_sequence_number;
     uint8_t ttl;
+    bool unknown_sequence_number;
 } AodvRreq;
 
 
 int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq);
+int aodv_send_rreq2(struct broadcast_conn *bc, uint8_t destination_address);
 AodvRreq *aodv_receive_rreq(uint8_t *data);
 
 void aodv_routing_table_init();

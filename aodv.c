@@ -7,23 +7,55 @@
 // Size of 256 will already cause boot loops on motes.
 static AodvRoutingEntry routing_table[AODV_RT_SIZE];
 
+// ID incremented before every RREQ a nodes makes to allow duplicate detection.
+static uint8_t node_rreq_number = 0;
+
 int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq) {
     static uint8_t buffer[sizeof(AodvRreq) + 1];
 
     buffer[0] = RREQ;
-    buffer[1] = rreq->source_address;
-    buffer[2] = rreq->destination_address;
-    buffer[3] = rreq->ttl;
+    buffer[1] = (rreq->unknown_sequence_number << 1);
+    buffer[2] = rreq->id;
+    buffer[3] = rreq->source_address;
+    buffer[4] = rreq->source_sequence_number;
+    buffer[5] = rreq->destination_address;
+    buffer[6] = rreq->destination_sequence_number;
+    buffer[7] = rreq->ttl;
 
     packetbuf_copyfrom(buffer, sizeof(buffer));
     return broadcast_send(bc);
 }
 
+int aodv_send_rreq2(struct broadcast_conn *bc, uint8_t destination_address) {
+    static AodvRreq rreq;
+
+    // Check if we have a destination route already
+    if(routing_table[destination_address].in_use) {
+        rreq.destination_sequence_number = routing_table[destination_address].sequence_number;
+        rreq.unknown_sequence_number = !routing_table[destination_address].valid_sequence_number;
+    } else {
+        rreq.destination_sequence_number = 0;
+        rreq.unknown_sequence_number = true;
+    }
+
+    rreq.id = ++node_rreq_number;
+    rreq.source_address = linkaddr_node_addr.u8[0];
+    rreq.source_sequence_number = ++routing_table[linkaddr_node_addr.u8[0]].sequence_number;
+    rreq.destination_address = destination_address;
+    rreq.ttl = AODV_RREQ_TTL;
+
+    return aodv_send_rreq(bc, &rreq);
+}
+
 AodvRreq *aodv_receive_rreq(uint8_t *data) {
     static AodvRreq rreq;
-    rreq.source_address = data[0];
-    rreq.destination_address = data[1];
-    rreq.ttl = data[2];
+    rreq.unknown_sequence_number = data[1] & 0x01;
+    rreq.id = data[2];
+    rreq.source_address = data[3];
+    rreq.source_sequence_number = data[4];
+    rreq.destination_address = data[5];
+    rreq.destination_sequence_number = data[6];
+    rreq.ttl = data[7];
 
     return &rreq;
 }
@@ -33,6 +65,14 @@ void aodv_routing_table_init() {
     for(i = 0; i < AODV_RT_SIZE; i++) {
         routing_table[i].in_use = false;
     }
+
+    // Add self to routing table as a static route and maintain own sequence number in this entry
+    routing_table[linkaddr_node_addr.u8[0]].in_use = true;
+    routing_table[linkaddr_node_addr.u8[0]].next_hop = linkaddr_node_addr.u8[0];
+    routing_table[linkaddr_node_addr.u8[0]].distance = 0;
+    // Local sequence number used as a kind of logical clock to determine recency of a route
+    routing_table[linkaddr_node_addr.u8[0]].sequence_number = 0;
+    routing_table[linkaddr_node_addr.u8[0]].valid_sequence_number = true;
 }
 
 void aodv_routing_table_print() {
