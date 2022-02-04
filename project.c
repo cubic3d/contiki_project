@@ -29,6 +29,11 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
             static AodvRreq *rreq;
             rreq = aodv_receive_rreq(data);
 
+            // Drop RREQ if already seen
+            if(aodv_seen_rreq(rreq)) {
+                break;
+            }
+
             printf("Received RREQ from %d to %d, TTL: %d\n", rreq->source_address, rreq->destination_address, rreq->ttl);
 
             aodv_routing_table_update(from->u8[0], rreq);

@@ -14,7 +14,8 @@ static uint8_t node_rreq_number = 0;
 // as long as they occur in AODV_PATH_DISCOVERY_TIME.
 // This is simplified to a single entry, where a dynamic list would be a better for of multiple expiring entires.
 // Clearing this entry after AODV_PATH_DISCOVERY_TIME is not implemented due to simplicity.
-static uint8_t node_last_sent_rreq_id = 0;
+static uint8_t node_last_seen_rreq_id = 0;
+static uint8_t node_last_seen_source_address = 0;
 
 int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq) {
     // Prevent sending requests with expired TTL
@@ -22,13 +23,9 @@ int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq) {
         return 0;
     }
 
-    // Prevent sending requests we sent ourselves before
-    if(rreq->source_address == linkaddr_node_addr.u8[0] && rreq->id == node_last_sent_rreq_id) {
-        return 0;
-    }
-
     // Mark RREQ ID as sent
-    node_last_sent_rreq_id = rreq->id;
+    node_last_seen_rreq_id = rreq->id;
+    node_last_seen_source_address = rreq->source_address;
 
     static uint8_t buffer[sizeof(AodvRreq) + 1];
 
@@ -64,6 +61,10 @@ int aodv_send_rreq2(struct broadcast_conn *bc, uint8_t destination_address) {
     rreq.ttl = AODV_RREQ_TTL;
 
     return aodv_send_rreq(bc, &rreq);
+}
+
+bool aodv_seen_rreq(AodvRreq *rreq) {
+    return node_last_seen_rreq_id == rreq->id && node_last_seen_source_address == rreq->source_address;
 }
 
 AodvRreq *aodv_receive_rreq(uint8_t *data) {
