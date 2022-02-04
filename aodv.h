@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "broadcast.h"
+#include "unicast.h"
 #include <stdbool.h>
 
 #define AODV_RREQ_TTL 10
@@ -18,6 +19,7 @@ typedef struct {
 
 typedef enum {
     RREQ,
+    RREP,
 } AodvType;
 
 typedef struct {
@@ -30,12 +32,24 @@ typedef struct {
     bool unknown_sequence_number;
 } AodvRreq;
 
+typedef struct {
+    uint8_t distance;
+    uint8_t source_address;
+    uint8_t destination_address;
+    uint8_t destination_sequence_number;
+} AodvRrep;
+
 
 int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq);
 int aodv_send_rreq2(struct broadcast_conn *bc, uint8_t destination_address);
 bool aodv_seen_rreq(AodvRreq *rreq);
 AodvRreq *aodv_receive_rreq(uint8_t *data);
 void aodv_print_rreq(const char* action, AodvRreq *rreq);
+
+int aodv_send_rrep(struct unicast_conn *uc, AodvRrep *rrep);
+int aodv_send_rrep2(struct unicast_conn *uc, AodvRreq *rreq);
+AodvRrep *aodv_receive_rrep(uint8_t *data);
+void aodv_print_rrep(const char* action, AodvRrep *rrep);
 
 void aodv_routing_table_init();
 void aodv_routing_table_print();

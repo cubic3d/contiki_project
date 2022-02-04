@@ -94,6 +94,46 @@ void aodv_print_rreq(const char* action, AodvRreq *rreq) {
         rreq->ttl);
 }
 
+int aodv_send_rrep(struct unicast_conn *uc, AodvRrep *rrep) {
+    // Check if we have a route (we should!) and pull address for the hop
+    static uint8_t next_hop = 0;
+    if(routing_table[rrep->source_address].in_use) {
+        next_hop = routing_table[rrep->source_address].next_hop;
+    }
+
+    static uint8_t buffer[sizeof(AodvRrep) + 1];
+
+    buffer[0] = RREP;
+    buffer[1] = rrep->distance;
+    buffer[2] = rrep->source_address;
+    buffer[3] = rrep->destination_address;
+    buffer[4] = rrep->destination_sequence_number;
+
+    // Create a link address to use in unicast sender
+    static linkaddr_t addr;
+    addr.u8[0] = next_hop;
+    addr.u8[1] = 0;
+
+    packetbuf_copyfrom(buffer, sizeof(buffer));
+    aodv_print_rrep("Send", rrep);
+    return unicast_send(uc, &addr);
+}
+
+int aodv_send_rrep2(struct unicast_conn *uc, AodvRreq *rreq) {
+    static AodvRrep rrep;
+
+    rrep.distance = AODV_RREQ_TTL - rreq->ttl + 1;
+    rrep.source_address = rreq->source_address;
+    rrep.destination_address = rreq->destination_address;
+    rrep.destination_sequence_number = rreq->destination_sequence_number;
+
+    return aodv_send_rrep(uc, &rrep);
+}
+
+AodvRrep *aodv_receive_rrep(uint8_t *data);
+
+void aodv_print_rrep(const char* action, AodvRrep *rrep);
+
 void aodv_routing_table_init() {
     static uint8_t i;
     for(i = 0; i < AODV_RT_SIZE; i++) {
