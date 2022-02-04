@@ -13,6 +13,7 @@ static uint8_t node_rreq_number = 0;
 // The tuple (node_last_sent_rreq_id, own_address) identifies self sent RREQ which can be dropped
 // as long as they occur in AODV_PATH_DISCOVERY_TIME.
 // This is simplified to a single entry, where a dynamic list would be a better for of multiple expiring entires.
+// Clearing this entry after AODV_PATH_DISCOVERY_TIME is not implemented due to simplicity.
 static uint8_t node_last_sent_rreq_id = 0;
 
 int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq) {

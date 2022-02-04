@@ -7,7 +7,6 @@
 
 #define AODV_RREQ_TTL 10
 #define AODV_RT_SIZE 50
-#define AODV_PATH_DISCOVERY_TIME 5
 
 typedef struct {
     bool in_use;
