@@ -89,7 +89,7 @@ PROCESS_THREAD(init, ev, data) {
 
             printf("Sending RREQ to %d\n", rreq.destination_address);
             aodv_send_rreq(&broadcast, &rreq);
-        } else if(strcmp(command, "print_table") == 0) {
+        } else if(strcmp(command, "pt") == 0) {
             aodv_routing_table_print(routing_table);
         }
     }
