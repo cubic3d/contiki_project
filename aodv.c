@@ -121,10 +121,10 @@ int aodv_send_rrep(struct unicast_conn *uc, AodvRrep *rrep) {
     return unicast_send(uc, &addr);
 }
 
-int aodv_send_rrep2(struct unicast_conn *uc, AodvRreq *rreq) {
+int aodv_send_rrep2(struct unicast_conn *uc, AodvRreq *rreq, uint8_t hop_count_init) {
     static AodvRrep rrep;
 
-    rrep.hop_count = 0;
+    rrep.hop_count = hop_count_init;
     rrep.source_address = rreq->source_address;
     rrep.destination_address = rreq->destination_address;
     rrep.destination_sequence_number = rreq->destination_sequence_number;
