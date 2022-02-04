@@ -34,10 +34,8 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
             aodv_routing_table_update(from->u8[0], rreq);
 
             // Flood as long as packet is alive
-            if(rreq->ttl > 0) {
-                rreq->ttl--;
-                aodv_send_rreq(&broadcast, rreq);
-            }
+            rreq->ttl--;
+            aodv_send_rreq(&broadcast, rreq);
             break;
 
         default:

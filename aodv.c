@@ -10,7 +10,25 @@ static AodvRoutingEntry routing_table[AODV_RT_SIZE];
 // ID incremented before every RREQ a nodes makes to allow duplicate detection.
 static uint8_t node_rreq_number = 0;
 
+// The tuple (node_last_sent_rreq_id, own_address) identifies self sent RREQ which can be dropped
+// as long as they occur in AODV_PATH_DISCOVERY_TIME.
+// This is simplified to a single entry, where a dynamic list would be a better for of multiple expiring entires.
+static uint8_t node_last_sent_rreq_id = 0;
+
 int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq) {
+    // Prevent sending requests with expired TTL
+    if(rreq->ttl <= 0) {
+        return 0;
+    }
+
+    // Prevent sending requests we sent ourselves before
+    if(rreq->source_address == linkaddr_node_addr.u8[0] && rreq->id == node_last_sent_rreq_id) {
+        return 0;
+    }
+
+    // Mark RREQ ID as sent
+    node_last_sent_rreq_id = rreq->id;
+
     static uint8_t buffer[sizeof(AodvRreq) + 1];
 
     buffer[0] = RREQ;
