@@ -77,11 +77,16 @@ void aodv_routing_table_init() {
 
 void aodv_routing_table_print() {
     printf("----------------------------\n");
-    printf("%-15s%-15s%-15s\n", "Destination", "Next Hop", "Distance");
+    printf("%-15s%-15s%-15s%-15s%-15s\n", "Destination", "Next Hop", "Distance", "SN", "SN Valid");
     static uint8_t i;
     for(i = 0; i < AODV_RT_SIZE; i++) {
         if(routing_table[i].in_use) {
-            printf("%-15d%-15d%-15d\n", i, routing_table[i].next_hop, routing_table[i].distance);
+            printf("%-15d%-15d%-15d%-15d%-15s\n",
+            i,
+            routing_table[i].next_hop,
+            routing_table[i].distance,
+            routing_table[i].sequence_number,
+            routing_table[i].valid_sequence_number ? "yes": "no");
         }
     }
     printf("----------------------------\n");
