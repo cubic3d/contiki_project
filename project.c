@@ -65,11 +65,7 @@ PROCESS_THREAD(init, ev, data) {
 
     PROCESS_BEGIN();
 
-    // Init routing table
-    static uint8_t i;
-    for(i = 0; i < sizeof(routing_table) / sizeof(routing_table[0]); i++) {
-        routing_table[i].in_use = false;
-    }
+    aodv_routing_table_init(routing_table);
 
     // Hook UART1 to serial line API
     uart1_set_input(serial_line_input_byte);

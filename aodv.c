@@ -21,3 +21,10 @@ AodvRreq *aodv_receive_rreq(uint8_t *data) {
 
     return &rreq;
 }
+
+void aodv_routing_table_init(AodvRoutingEntry *rt) {
+    static uint8_t i;
+    for(i = 0; i < sizeof(rt) / sizeof(rt[0]); i++) {
+        rt[i].in_use = false;
+    }
+}
