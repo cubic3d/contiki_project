@@ -102,7 +102,7 @@ int aodv_send_rrep(struct unicast_conn *uc, AodvRrep *rrep) {
     if(next_hop == 0) {
         // We don't implement ACK require flag
         printf("Error: RREP could not be sent - no route to node\n");
-        return;
+        return 0;
     }
 
     static uint8_t buffer[sizeof(AodvRrep) + 1];
