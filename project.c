@@ -159,6 +159,15 @@ PROCESS_THREAD(init, ev, data) {
             aodv_send_rreq2(&broadcast, destination_address);
         } else if(strcmp(command, "pt") == 0) {
             aodv_routing_table_print();
+        } else if(strcmp(command, "rerr") == 0) {
+            // Send RERR with defined destination and sequence number
+            static uint8_t destination_address;
+            destination_address = atoi(strtok(NULL, " "));
+
+            static uint8_t destination_sequence_number;
+            destination_sequence_number = atoi(strtok(NULL, " "));
+
+            aodv_send_rerr2(&unicast, destination_address, destination_sequence_number);
         }
     }
 
