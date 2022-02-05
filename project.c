@@ -30,14 +30,26 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
             static AodvRreq *rreq;
             rreq = aodv_receive_rreq(data);
 
-            aodv_routing_table_update_prev_hop(from->u8[0], rreq);
+            aodv_routing_table_update_if_required(
+                from->u8[0],
+                from->u8[0],
+                1,
+                0,
+                false
+            );
 
             // Drop RREQ if already seen
             if(aodv_seen_rreq(rreq)) {
                 break;
             }
 
-            aodv_routing_table_update_source(from->u8[0], rreq);
+            aodv_routing_table_update_if_required(
+                rreq->source_address,
+                from->u8[0],
+                AODV_RREQ_TTL - rreq->ttl + 1,
+                rreq->source_sequence_number,
+                true
+            );
 
             // Check if we are the destination and should respond
             if(rreq->destination_address == linkaddr_node_addr.u8[0]) {

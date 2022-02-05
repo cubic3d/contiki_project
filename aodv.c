@@ -208,35 +208,30 @@ void aodv_routing_table_print() {
     printf("----------------------------\n");
 }
 
-void aodv_routing_table_update_prev_hop(uint8_t from, AodvRreq *rreq) {
-    // Directly update the table, as this information is current in any case
-    routing_table[from].in_use = true;
-    routing_table[from].distance = 1;
-    routing_table[from].next_hop = from;
-    routing_table[from].sequence_number = 0;
-    routing_table[from].valid_sequence_number = false;
-    printf("Added route to %d via %d, reason: direct neighbor, previous hop rule\n", from, from);
-}
-
-void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq) {
+void aodv_routing_table_update_if_required(
+        uint8_t to,
+        uint8_t via,
+        uint8_t distance,
+        uint8_t sequence_number,
+        bool valid_sequence_number) {
     static bool update = false;
 
     // Determine if we should update the route, trying to be explicit
-    if(routing_table[rreq->source_address].in_use) {
-        if(routing_table[rreq->source_address].valid_sequence_number) {
+    if(routing_table[to].in_use) {
+        if(routing_table[to].valid_sequence_number) {
             // Compare sequence numbers
             // This casts the result into signed integer as per RFC to accomplish smooth rollover
             static int8_t sequence_diff;
-            sequence_diff = rreq->source_sequence_number - routing_table[rreq->source_address].sequence_number + 1;
+            sequence_diff = sequence_number - routing_table[to].sequence_number + 1;
 
             if(sequence_diff > 0) {
                 update = true;
-                printf("Updated route to %d via %d, reason: newer sequence number\n", rreq->source_address, from);
+                printf("Updated route to %d via %d, reason: newer sequence number\n", to, via);
             } else if(sequence_diff == 0) {
                 // Equal sequence, compare distance and update if new is lower
-                if(AODV_RREQ_TTL - rreq->ttl + 1 < routing_table[rreq->source_address].distance) {
+                if(distance < routing_table[to].distance) {
                     update = true;
-                    printf("Updated route to %d via %d, reason: shorter distance\n", rreq->source_address, from);
+                    printf("Updated route to %d via %d, reason: shorter distance\n", to, via);
                 } else {
                     update = false;
                 }
@@ -245,20 +240,20 @@ void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq) {
             }
         } else {
             update = true;
-            printf("Updated route to %d via %d, reason: invalid sequence number\n", rreq->source_address, from);
+            printf("Updated route to %d via %d, reason: invalid sequence number\n", to, via);
         }
     } else {
         update = true;
-        printf("Added route to %d via %d, reason: not existent\n", rreq->source_address, from);
+        printf("Added route to %d via %d, reason: not existent\n", to, via);
     }
 
-    // Update routing table based on the packet source
+    // Update routing table
     if(update) {
-        routing_table[rreq->source_address].in_use = true;
-        routing_table[rreq->source_address].distance = AODV_RREQ_TTL - rreq->ttl + 1;
-        routing_table[rreq->source_address].next_hop = from;
-        routing_table[rreq->source_address].sequence_number = rreq->source_sequence_number;
-        routing_table[rreq->source_address].valid_sequence_number = true;
+        routing_table[to].in_use = true;
+        routing_table[to].distance = distance;
+        routing_table[to].next_hop = via;
+        routing_table[to].sequence_number = sequence_number;
+        routing_table[to].valid_sequence_number = valid_sequence_number;
     }
 }
 

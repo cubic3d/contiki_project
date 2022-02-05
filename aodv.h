@@ -54,8 +54,11 @@ void aodv_print_rrep(const char* action, AodvRrep *rrep);
 
 void aodv_routing_table_init();
 void aodv_routing_table_print();
-void aodv_routing_table_update_prev_hop(uint8_t from, AodvRreq *rreq);
-void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq);
+void aodv_routing_table_update_if_required(uint8_t to,
+    uint8_t via,
+    uint8_t distance,
+    uint8_t sequence_number,
+    bool valid_sequence_number);
 bool aodv_routing_table_has_latest_route(AodvRreq *rreq);
 
 #endif
