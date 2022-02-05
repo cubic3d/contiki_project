@@ -18,7 +18,7 @@ int data_send_ping(struct runicast_conn *rc, DataPing *ping) {
     buffer[2] = ping->destination_address;
 
     static linkaddr_t addr;
-    addr.u8[0] = ping->destination_address;
+    addr.u8[0] = next_hop;
     addr.u8[1] = 0;
 
     packetbuf_copyfrom(buffer, sizeof(buffer));
