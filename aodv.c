@@ -330,6 +330,7 @@ bool aodv_routing_table_remove_stale_route(uint8_t to, uint8_t sequence_number) 
             && routing_table[to].known_sequence_number
             && sequence_number > routing_table[to].sequence_number) {
         routing_table[to].in_use = false;
+        printf("Removed route to %d via %d, reason: indicated as stale\n");
         return true;
     }
 
