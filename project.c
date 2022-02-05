@@ -30,6 +30,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
             static AodvRreq *rreq;
             rreq = aodv_receive_rreq(data);
 
+            // Update route to neighbor
             aodv_routing_table_update_if_required(
                 from->u8[0],
                 from->u8[0],
@@ -43,6 +44,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
                 break;
             }
 
+            // Update route to source
             aodv_routing_table_update_if_required(
                 rreq->source_address,
                 from->u8[0],
@@ -85,6 +87,36 @@ unicast_recv(struct unicast_conn *c, const linkaddr_t *from) {
         case RREP:;
             static AodvRrep *rrep;
             rrep = aodv_receive_rrep(data);
+
+            // Update route to neighbor
+            aodv_routing_table_update_if_required(
+                from->u8[0],
+                from->u8[0],
+                1,
+                0,
+                false
+            );
+
+            // Increment hop count in packet since we process it
+            rrep->hop_count++;
+
+            // Update route to destination
+            aodv_routing_table_update_if_required(
+                rrep->destination_address,
+                from->u8[0],
+                rrep->hop_count,
+                rrep->destination_sequence_number,
+                true
+            );
+
+            // If we are the destination of this RREP no further forwarding needed
+            if(rrep->source_address == linkaddr_node_addr.u8[0]) {
+                break;
+            }
+
+            // Forward RREP to next hop
+            aodv_send_rrep(&unicast, rrep);
+
             break;
 
         default:
