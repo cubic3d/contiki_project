@@ -130,8 +130,8 @@ int aodv_send_rrep_as_destination(struct unicast_conn *uc, AodvRreq *rreq) {
     // since the RFC contradicts itself in quite some places...
     // Also doesn't mention to check the unknown flag...
     if(rreq->known_sequence_number
-            && rreq->destination_address > routing_table[linkaddr_node_addr.u8[0]].sequence_number) {
-        routing_table[linkaddr_node_addr.u8[0]].sequence_number = rreq->destination_address;
+            && rreq->destination_sequence_number > routing_table[linkaddr_node_addr.u8[0]].sequence_number) {
+        routing_table[linkaddr_node_addr.u8[0]].sequence_number = rreq->destination_sequence_number;
     }
 
     static AodvRrep rrep;
