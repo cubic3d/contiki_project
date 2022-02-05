@@ -183,14 +183,14 @@ int aodv_send_rerr(struct unicast_conn *uc, AodvRerr *rerr) {
     buffer[1] = rerr->destination_address;
     buffer[2] = rerr->destination_sequence_number;
 
-    packetbuf_copyfrom(buffer, sizeof(buffer));
-
     // For simplicity, this will send the packet not only to precursors (we don't track them)
     // but to every known route with a known sequence number.
+    static linkaddr_t addr;
     static uint8_t i = 0;
     for(i = 0; i < AODV_RT_SIZE; i++) {
-        if(routing_table[i].in_use && routing_table[i].known_sequence_number) {
-            static linkaddr_t addr;
+        if(routing_table[i].in_use
+                && routing_table[i].known_sequence_number
+                && routing_table[i].next_hop != linkaddr_node_addr.u8[0]) {
             addr.u8[0] = routing_table[i].next_hop;
             addr.u8[1] = 0;
 
