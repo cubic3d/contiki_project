@@ -128,7 +128,9 @@ int aodv_send_rrep_as_destination(struct unicast_conn *uc, AodvRreq *rreq) {
     // https://www.rfc-editor.org/rfc/rfc3561#section-6.6.1
     // We will use the maximum method described in https://www.rfc-editor.org/rfc/rfc3561#section-6.1
     // since the RFC contradicts itself in quite some places...
-    if(rreq->destination_address > routing_table[linkaddr_node_addr.u8[0]].sequence_number) {
+    // Also doesn't mention to check the unknown flag...
+    if(!rreq->unknown_sequence_number
+            && rreq->destination_address > routing_table[linkaddr_node_addr.u8[0]].sequence_number) {
         routing_table[linkaddr_node_addr.u8[0]].sequence_number = rreq->destination_address;
     }
 
