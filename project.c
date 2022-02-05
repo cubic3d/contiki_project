@@ -12,12 +12,14 @@ the datatype, since it's sufficient as a demonstration.
 #include "dev/uart1.h"
 #include "dev/serial-line.h"
 #include "aodv.h"
+#include "data.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 
 static struct broadcast_conn broadcast;
 static struct unicast_conn unicast;
+static struct runicast_conn runicast;
 
 // Handle incomming broadcast packets.
 static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
@@ -77,8 +79,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
 static const struct broadcast_callbacks broadcast_cb = {broadcast_recv};
 
 // Handle incomming unicast packets.
-static void
-unicast_recv(struct unicast_conn *c, const linkaddr_t *from) {
+static void unicast_recv(struct unicast_conn *c, const linkaddr_t *from) {
     static uint8_t *data;
     data = (uint8_t *)packetbuf_dataptr();
 
@@ -145,12 +146,28 @@ unicast_recv(struct unicast_conn *c, const linkaddr_t *from) {
 static const struct unicast_callbacks unicast_cb = {unicast_recv};
 
 
+// Handle incomming reliable unicast packets.
+static void runicast_recv(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno) {
+    printf("Recv DATA: From: %d", from->u8[0]);
+}
+
+static void runicast_sent(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions) {
+    printf("Recv DATA-ACK: From: %d | Retries: %d", to->u8[0], retransmissions);
+}
+
+static void runicast_timedout(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions) {
+    printf("Fail DATA: To: %d | Retries: %d", to->u8[0], retransmissions);
+}
+static const struct runicast_callbacks runicast_callbacks = {runicast_recv, runicast_sent, runicast_timedout};
+
+
 PROCESS(init, "Main process and command handler");
 AUTOSTART_PROCESSES(&init);
 
 PROCESS_THREAD(init, ev, data) {
     PROCESS_EXITHANDLER(broadcast_close(&broadcast);)
     PROCESS_EXITHANDLER(unicast_close(&unicast);)
+    PROCESS_EXITHANDLER(runicast_close(&runicast);)
 
     PROCESS_BEGIN();
 
@@ -162,6 +179,7 @@ PROCESS_THREAD(init, ev, data) {
 
     broadcast_open(&broadcast, 129, &broadcast_cb);
     unicast_open(&unicast, 146, &unicast_cb);
+    runicast_open(&runicast, 144, &runicast_callbacks);
 
     for(;;) {
         PROCESS_WAIT_EVENT_UNTIL(ev == serial_line_event_message && data != NULL);
@@ -190,6 +208,12 @@ PROCESS_THREAD(init, ev, data) {
             if(aodv_routing_table_remove_stale_route(destination_address, destination_sequence_number)) {
                 aodv_send_rerr2(&unicast, 0, destination_address, destination_sequence_number);
             }
+        } else if(strcmp(command, "ping") == 0) {
+            // Send an example data packet to a node
+            static uint8_t destination_address;
+            destination_address = atoi(strtok(NULL, " "));
+
+            data_send_ping2(&runicast, destination_address);
         }
     }
 
