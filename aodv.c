@@ -250,7 +250,7 @@ void aodv_routing_table_init() {
 }
 
 void aodv_routing_table_print() {
-    printf("----------------------------\n");
+    printf("---------------------------------------------------------------------------\n");
     printf("%-15s%-15s%-15s%-15s%-15s\n", "Destination", "Next Hop", "Distance", "SN", "SN Known");
     static uint8_t i;
     for(i = 0; i < AODV_RT_SIZE; i++) {
@@ -263,7 +263,7 @@ void aodv_routing_table_print() {
             routing_table[i].known_sequence_number ? "yes": "no");
         }
     }
-    printf("----------------------------\n");
+    printf("---------------------------------------------------------------------------\n");
 }
 
 void aodv_routing_table_update_if_required(
