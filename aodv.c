@@ -30,7 +30,7 @@ int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq) {
     static uint8_t buffer[sizeof(AodvRreq) + 1];
 
     buffer[0] = RREQ;
-    buffer[1] = (rreq->unknown_sequence_number << 0);
+    buffer[1] = (rreq->known_sequence_number << 0);
     buffer[2] = rreq->id;
     buffer[3] = rreq->source_address;
     buffer[4] = rreq->source_sequence_number;
@@ -49,10 +49,10 @@ int aodv_send_rreq2(struct broadcast_conn *bc, uint8_t destination_address) {
     // Check if we have a destination route already
     if(routing_table[destination_address].in_use) {
         rreq.destination_sequence_number = routing_table[destination_address].sequence_number;
-        rreq.unknown_sequence_number = !routing_table[destination_address].known_sequence_number;
+        rreq.known_sequence_number = routing_table[destination_address].known_sequence_number;
     } else {
         rreq.destination_sequence_number = 0;
-        rreq.unknown_sequence_number = true;
+        rreq.known_sequence_number = false;
     }
 
     rreq.id = ++node_rreq_number;
@@ -70,7 +70,7 @@ bool aodv_seen_rreq(AodvRreq *rreq) {
 
 AodvRreq *aodv_receive_rreq(uint8_t *data) {
     static AodvRreq rreq;
-    rreq.unknown_sequence_number = data[1] & 0x01;
+    rreq.known_sequence_number = data[1] & 0x01;
     rreq.id = data[2];
     rreq.source_address = data[3];
     rreq.source_sequence_number = data[4];
@@ -90,7 +90,7 @@ void aodv_print_rreq(const char* action, AodvRreq *rreq) {
         rreq->source_sequence_number,
         rreq->destination_address,
         rreq->destination_sequence_number,
-        rreq->unknown_sequence_number ? "unknown" : "known  ",
+        rreq->known_sequence_number ? "known  " : "unknown",
         rreq->ttl);
 }
 
@@ -129,7 +129,7 @@ int aodv_send_rrep_as_destination(struct unicast_conn *uc, AodvRreq *rreq) {
     // We will use the maximum method described in https://www.rfc-editor.org/rfc/rfc3561#section-6.1
     // since the RFC contradicts itself in quite some places...
     // Also doesn't mention to check the unknown flag...
-    if(!rreq->unknown_sequence_number
+    if(rreq->known_sequence_number
             && rreq->destination_address > routing_table[linkaddr_node_addr.u8[0]].sequence_number) {
         routing_table[linkaddr_node_addr.u8[0]].sequence_number = rreq->destination_address;
     }

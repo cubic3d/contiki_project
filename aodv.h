@@ -29,7 +29,7 @@ typedef struct {
     uint8_t destination_address;
     uint8_t destination_sequence_number;
     uint8_t ttl;
-    bool unknown_sequence_number;
+    bool known_sequence_number;
 } AodvRreq;
 
 typedef struct {
