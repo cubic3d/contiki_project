@@ -75,5 +75,6 @@ void aodv_routing_table_update_if_required(uint8_t to,
     bool known_sequence_number);
 bool aodv_routing_table_has_latest_route(AodvRreq *rreq);
 bool aodv_routing_table_remove_stale_route(uint8_t to, uint8_t sequence_number);
+uint8_t aodv_routing_table_lookup(uint8_t address);
 
 #endif

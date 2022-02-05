@@ -337,3 +337,11 @@ bool aodv_routing_table_remove_stale_route(uint8_t to, uint8_t sequence_number) 
 
     return false;
 }
+
+uint8_t aodv_routing_table_lookup(uint8_t address) {
+    if(routing_table[address].in_use) {
+        return routing_table[address].next_hop;
+    }
+
+    return 0;
+}
