@@ -49,7 +49,7 @@ int aodv_send_rreq2(struct broadcast_conn *bc, uint8_t destination_address) {
     // Check if we have a destination route already
     if(routing_table[destination_address].in_use) {
         rreq.destination_sequence_number = routing_table[destination_address].sequence_number;
-        rreq.unknown_sequence_number = !routing_table[destination_address].valid_sequence_number;
+        rreq.unknown_sequence_number = !routing_table[destination_address].known_sequence_number;
     } else {
         rreq.destination_sequence_number = 0;
         rreq.unknown_sequence_number = true;
@@ -188,12 +188,12 @@ void aodv_routing_table_init() {
     routing_table[linkaddr_node_addr.u8[0]].distance = 0;
     // Local sequence number used as a kind of logical clock to determine recency of a route
     routing_table[linkaddr_node_addr.u8[0]].sequence_number = 0;
-    routing_table[linkaddr_node_addr.u8[0]].valid_sequence_number = true;
+    routing_table[linkaddr_node_addr.u8[0]].known_sequence_number = true;
 }
 
 void aodv_routing_table_print() {
     printf("----------------------------\n");
-    printf("%-15s%-15s%-15s%-15s%-15s\n", "Destination", "Next Hop", "Distance", "SN", "SN Valid");
+    printf("%-15s%-15s%-15s%-15s%-15s\n", "Destination", "Next Hop", "Distance", "SN", "SN Known");
     static uint8_t i;
     for(i = 0; i < AODV_RT_SIZE; i++) {
         if(routing_table[i].in_use) {
@@ -202,7 +202,7 @@ void aodv_routing_table_print() {
             routing_table[i].next_hop,
             routing_table[i].distance,
             routing_table[i].sequence_number,
-            routing_table[i].valid_sequence_number ? "yes": "no");
+            routing_table[i].known_sequence_number ? "yes": "no");
         }
     }
     printf("----------------------------\n");
@@ -213,12 +213,12 @@ void aodv_routing_table_update_if_required(
         uint8_t via,
         uint8_t distance,
         uint8_t sequence_number,
-        bool valid_sequence_number) {
+        bool known_sequence_number) {
     static bool update = false;
 
     // Determine if we should update the route, trying to be explicit
     if(routing_table[to].in_use) {
-        if(routing_table[to].valid_sequence_number) {
+        if(routing_table[to].known_sequence_number) {
             // Compare sequence numbers
             // This casts the result into signed integer as per RFC to accomplish smooth rollover
             static int8_t sequence_diff;
@@ -240,7 +240,7 @@ void aodv_routing_table_update_if_required(
             }
         } else {
             update = true;
-            printf("Updated route to %d via %d, reason: invalid sequence number\n", to, via);
+            printf("Updated route to %d via %d, reason: unknown sequence number\n", to, via);
         }
     } else {
         update = true;
@@ -253,7 +253,7 @@ void aodv_routing_table_update_if_required(
         routing_table[to].distance = distance;
         routing_table[to].next_hop = via;
         routing_table[to].sequence_number = sequence_number;
-        routing_table[to].valid_sequence_number = valid_sequence_number;
+        routing_table[to].known_sequence_number = known_sequence_number;
     }
 }
 
@@ -261,6 +261,6 @@ bool aodv_routing_table_has_latest_route(AodvRreq *rreq) {
     // Route must be in use, have a known sequence number and be equal or greater than requested
     // Use signed comparison for smooth rollover according to RFC
     return routing_table[rreq->destination_address].in_use
-            && routing_table[rreq->destination_address].valid_sequence_number
+            && routing_table[rreq->destination_address].known_sequence_number
             && (int8_t)(routing_table[rreq->destination_address].sequence_number - rreq->destination_sequence_number) >= 0;
 }

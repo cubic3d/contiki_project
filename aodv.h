@@ -14,7 +14,7 @@ typedef struct {
     uint8_t next_hop;
     uint8_t distance;
     uint8_t sequence_number;
-    bool valid_sequence_number;
+    bool known_sequence_number;
 } AodvRoutingEntry;
 
 typedef enum {
@@ -58,7 +58,7 @@ void aodv_routing_table_update_if_required(uint8_t to,
     uint8_t via,
     uint8_t distance,
     uint8_t sequence_number,
-    bool valid_sequence_number);
+    bool known_sequence_number);
 bool aodv_routing_table_has_latest_route(AodvRreq *rreq);
 
 #endif
