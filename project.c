@@ -73,7 +73,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
             break;
 
         default:
-            printf("Received unknown packet type %d", data[0]);
+            printf("Received unknown packet type %d\n", data[0]);
     }
 }
 static const struct broadcast_callbacks broadcast_cb = {broadcast_recv};
@@ -140,7 +140,7 @@ static void unicast_recv(struct unicast_conn *c, const linkaddr_t *from) {
             break;
 
         default:
-            printf("Received unknown packet type %d", data[0]);
+            printf("Received unknown packet type %d\n", data[0]);
     }
 }
 static const struct unicast_callbacks unicast_cb = {unicast_recv};
@@ -170,14 +170,14 @@ static void runicast_recv(struct runicast_conn *c, const linkaddr_t *from, uint8
             break;
 
         default:
-            printf("Received unknown packet type %d", data[0]);
+            printf("Received unknown packet type %d\n", data[0]);
     }
 }
 
 static void runicast_sent(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions) {}
 
 static void runicast_timedout(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions) {
-    printf("Fail DATA: To: %d | Retries: %d", to->u8[0], retransmissions);
+    printf("Fail DATA: To: %d | Retries: %d\n", to->u8[0], retransmissions);
 }
 static const struct runicast_callbacks runicast_callbacks = {runicast_recv, runicast_sent, runicast_timedout};
 
