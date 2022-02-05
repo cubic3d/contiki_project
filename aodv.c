@@ -176,6 +176,44 @@ void aodv_print_rrep(const char* action, AodvRrep *rrep) {
         rrep->destination_sequence_number);
 }
 
+int aodv_send_rerr(struct broadcast_conn *bc, AodvRerr *rerr) {
+    static uint8_t buffer[sizeof(AodvRerr) + 1];
+
+    buffer[0] = RERR;
+    buffer[1] = rerr->destination_address;
+    buffer[2] = rerr->destination_sequence_number;
+
+    packetbuf_copyfrom(buffer, sizeof(buffer));
+    aodv_print_rerr("Send", rerr);
+    return broadcast_send(bc);
+}
+
+int aodv_send_rerr2(struct broadcast_conn *bc, uint8_t destination_address, uint8_t destination_sequence_number) {
+    static AodvRerr rerr;
+
+    rerr.destination_address = destination_address;
+    rerr.destination_sequence_number = destination_sequence_number;
+
+    return aodv_send_rerr(bc, &rerr);
+}
+
+AodvRerr *aodv_receive_rerr(uint8_t *data) {
+    static AodvRerr rerr;
+    
+    rerr.destination_address = data[1];
+    rerr.destination_sequence_number = data[2];
+
+    aodv_print_rerr("Recv", &rerr);
+    return &rerr;
+}
+
+void aodv_print_rerr(const char* action, AodvRerr *rerr) {
+    printf("%s RREP: Destination: %d/%d\n",
+        action,
+        rerr->destination_address,
+        rerr->destination_sequence_number);
+}
+
 void aodv_routing_table_init() {
     static uint8_t i;
     for(i = 0; i < AODV_RT_SIZE; i++) {

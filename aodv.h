@@ -20,6 +20,7 @@ typedef struct {
 typedef enum {
     RREQ,
     RREP,
+    RERR,
 } AodvType;
 
 typedef struct {
@@ -39,6 +40,11 @@ typedef struct {
     uint8_t destination_sequence_number;
 } AodvRrep;
 
+typedef struct {
+    uint8_t destination_address;
+    uint8_t destination_sequence_number;
+} AodvRerr;
+
 
 int aodv_send_rreq(struct broadcast_conn *bc, AodvRreq *rreq);
 int aodv_send_rreq2(struct broadcast_conn *bc, uint8_t destination_address);
@@ -51,6 +57,11 @@ int aodv_send_rrep_as_destination(struct unicast_conn *uc, AodvRreq *rreq);
 int aodv_send_rrep_as_intermediate(struct unicast_conn *uc, AodvRreq *rreq);
 AodvRrep *aodv_receive_rrep(uint8_t *data);
 void aodv_print_rrep(const char* action, AodvRrep *rrep);
+
+int aodv_send_rerr(struct broadcast_conn *bc, AodvRerr *rerr);
+int aodv_send_rerr2(struct broadcast_conn *bc, uint8_t destination_address, uint8_t destination_sequence_number);
+AodvRerr *aodv_receive_rerr(uint8_t *data);
+void aodv_print_rerr(const char* action, AodvRerr *rerr);
 
 void aodv_routing_table_init();
 void aodv_routing_table_print();
