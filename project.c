@@ -45,7 +45,11 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
                 break;
             }
 
-            // TODO Check if we have a route to the destination and can respond on behalf
+            // Check if we have a route to the destination and can respond on behalf
+            if(aodv_routing_table_has_latest_route(rreq)) {
+                aodv_send_rrep_as_intermediate(&unicast, rreq);
+                break;
+            }
 
             // Flood as long as packet is alive
             rreq->ttl--;

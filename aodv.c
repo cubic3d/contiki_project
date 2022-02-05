@@ -144,6 +144,17 @@ int aodv_send_rrep_as_destination(struct unicast_conn *uc, AodvRreq *rreq) {
     return aodv_send_rrep(uc, &rrep);
 }
 
+int aodv_send_rrep_as_intermediate(struct unicast_conn *uc, AodvRreq *rreq) {
+    static AodvRrep rrep;
+
+    rrep.hop_count = routing_table[rreq->destination_address].distance;
+    rrep.source_address = rreq->source_address;
+    rrep.destination_address = rreq->destination_address;
+    rrep.destination_sequence_number = routing_table[rreq->destination_address].sequence_number;
+
+    return aodv_send_rrep(uc, &rrep);
+}
+
 AodvRrep *aodv_receive_rrep(uint8_t *data) {
     static AodvRrep rrep;
     
@@ -249,4 +260,12 @@ void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq) {
         routing_table[rreq->source_address].sequence_number = rreq->source_sequence_number;
         routing_table[rreq->source_address].valid_sequence_number = true;
     }
+}
+
+bool aodv_routing_table_has_latest_route(AodvRreq *rreq) {
+    // Route must be in use, have a known sequence number and be equal or greater than requested
+    // Use signed comparison for smooth rollover according to RFC
+    return routing_table[rreq->destination_address].in_use
+            && routing_table[rreq->destination_address].valid_sequence_number
+            && (int8_t)(routing_table[rreq->destination_address].sequence_number - rreq->destination_sequence_number) >= 0;
 }

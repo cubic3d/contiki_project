@@ -48,6 +48,7 @@ void aodv_print_rreq(const char* action, AodvRreq *rreq);
 
 int aodv_send_rrep(struct unicast_conn *uc, AodvRrep *rrep);
 int aodv_send_rrep_as_destination(struct unicast_conn *uc, AodvRreq *rreq);
+int aodv_send_rrep_as_intermediate(struct unicast_conn *uc, AodvRreq *rreq);
 AodvRrep *aodv_receive_rrep(uint8_t *data);
 void aodv_print_rrep(const char* action, AodvRrep *rrep);
 
@@ -55,5 +56,6 @@ void aodv_routing_table_init();
 void aodv_routing_table_print();
 void aodv_routing_table_update_prev_hop(uint8_t from, AodvRreq *rreq);
 void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq);
+bool aodv_routing_table_has_latest_route(AodvRreq *rreq);
 
 #endif
