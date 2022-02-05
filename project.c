@@ -122,6 +122,20 @@ unicast_recv(struct unicast_conn *c, const linkaddr_t *from) {
             static AodvRerr *rerr;
             rerr = aodv_receive_rerr(data);
 
+            // Update route to neighbor
+            aodv_routing_table_update_if_required(
+                from->u8[0],
+                from->u8[0],
+                1,
+                0,
+                false
+            );
+
+            // Invalidate route if we have it and if done so, notify other neigbors of the stale route
+            if(aodv_routing_table_remove_stale_route(rerr->destination_address, rerr->destination_sequence_number)) {
+                aodv_send_rerr(&unicast, from->u8[0], rerr);
+            }
+
             break;
 
         default:
