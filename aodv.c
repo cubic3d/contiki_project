@@ -222,7 +222,7 @@ void aodv_routing_table_update_if_required(
             // Compare sequence numbers
             // This casts the result into signed integer as per RFC to accomplish smooth rollover
             static int8_t sequence_diff;
-            sequence_diff = sequence_number - routing_table[to].sequence_number + 1;
+            sequence_diff = sequence_number - routing_table[to].sequence_number;
 
             if(sequence_diff > 0) {
                 update = true;
