@@ -118,6 +118,11 @@ unicast_recv(struct unicast_conn *c, const linkaddr_t *from) {
             aodv_send_rrep(&unicast, rrep);
 
             break;
+        case RERR:;
+            static AodvRerr *rerr;
+            rerr = aodv_receive_rerr(data);
+
+            break;
 
         default:
             printf("Received unknown packet type %d", data[0]);
@@ -167,7 +172,7 @@ PROCESS_THREAD(init, ev, data) {
             static uint8_t destination_sequence_number;
             destination_sequence_number = atoi(strtok(NULL, " "));
 
-            aodv_send_rerr2(&unicast, destination_address, destination_sequence_number);
+            aodv_send_rerr2(&unicast, 0, destination_address, destination_sequence_number);
         }
     }
 

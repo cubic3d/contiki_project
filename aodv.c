@@ -176,7 +176,7 @@ void aodv_print_rrep(const char* action, AodvRrep *rrep) {
         rrep->destination_sequence_number);
 }
 
-int aodv_send_rerr(struct unicast_conn *uc, AodvRerr *rerr) {
+int aodv_send_rerr(struct unicast_conn *uc, uint8_t exclude_address, AodvRerr *rerr) {
     static uint8_t buffer[sizeof(AodvRerr) + 1];
 
     buffer[0] = RERR;
@@ -190,7 +190,9 @@ int aodv_send_rerr(struct unicast_conn *uc, AodvRerr *rerr) {
     for(i = 0; i < AODV_RT_SIZE; i++) {
         if(routing_table[i].in_use
                 && routing_table[i].known_sequence_number
-                && routing_table[i].next_hop != linkaddr_node_addr.u8[0]) {
+                && routing_table[i].next_hop != linkaddr_node_addr.u8[0]
+                // Excluded address allows to ignore the sender of beeing notified again
+                && routing_table[i].next_hop != exclude_address) {
             addr.u8[0] = routing_table[i].next_hop;
             addr.u8[1] = 0;
 
@@ -203,13 +205,16 @@ int aodv_send_rerr(struct unicast_conn *uc, AodvRerr *rerr) {
     return 1;
 }
 
-int aodv_send_rerr2(struct unicast_conn *uc, uint8_t destination_address, uint8_t destination_sequence_number) {
+int aodv_send_rerr2(struct unicast_conn *uc,
+        uint8_t exclude_address,
+        uint8_t destination_address,
+        uint8_t destination_sequence_number) {
     static AodvRerr rerr;
 
     rerr.destination_address = destination_address;
     rerr.destination_sequence_number = destination_sequence_number;
 
-    return aodv_send_rerr(uc, &rerr);
+    return aodv_send_rerr(uc, exclude_address, &rerr);
 }
 
 AodvRerr *aodv_receive_rerr(uint8_t *data) {
