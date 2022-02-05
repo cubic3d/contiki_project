@@ -228,7 +228,7 @@ AodvRerr *aodv_receive_rerr(uint8_t *data) {
 }
 
 void aodv_print_rerr(const char* action, AodvRerr *rerr) {
-    printf("%s RREP: Destination: %d/%d\n",
+    printf("%s RERR: Destination: %d/%d\n",
         action,
         rerr->destination_address,
         rerr->destination_sequence_number);
