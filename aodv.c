@@ -97,10 +97,12 @@ void aodv_print_rreq(const char* action, AodvRreq *rreq) {
 int aodv_send_rrep(struct unicast_conn *uc, AodvRrep *rrep) {
     // Check if we have a route (we should!) and pull address for the hop
     static uint8_t next_hop = 0;
-    if(routing_table[rrep->source_address].in_use) {
-        next_hop = routing_table[rrep->source_address].next_hop;
-    } else {
+    next_hop = aodv_routing_table_lookup(rrep->source_address);
+
+    if(next_hop == 0) {
+        // We don't implement ACK require flag
         printf("Error: RREP could not be sent - no route to node\n");
+        return;
     }
 
     static uint8_t buffer[sizeof(AodvRrep) + 1];
