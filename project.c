@@ -39,6 +39,14 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from) {
 
             aodv_routing_table_update_source(from->u8[0], rreq);
 
+            // Check if we are the destination and should respond
+            if(rreq->destination_address == linkaddr_node_addr.u8[0]) {
+                aodv_send_rrep_as_destination(&unicast, rreq);
+                break;
+            }
+
+            // TODO Check if we have a route to the destination and can respond on behalf
+
             // Flood as long as packet is alive
             rreq->ttl--;
             aodv_send_rreq(&broadcast, rreq);

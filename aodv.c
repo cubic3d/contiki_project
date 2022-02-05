@@ -121,16 +121,23 @@ int aodv_send_rrep(struct unicast_conn *uc, AodvRrep *rrep) {
     return unicast_send(uc, &addr);
 }
 
-int aodv_send_rrep2(struct unicast_conn *uc,
-    AodvRreq *rreq,
-    uint8_t destination_sequence_number,
-    uint8_t hop_count_init) {
+int aodv_send_rrep_as_destination(struct unicast_conn *uc, AodvRreq *rreq) {
+    // If the generating node is the destination itself, it MUST increment
+    // its own sequence number by one if the sequence number in the RREQ
+    // packet is equal to that incremented value.
+    // https://www.rfc-editor.org/rfc/rfc3561#section-6.6.1
+    // We will use the maximum method described in https://www.rfc-editor.org/rfc/rfc3561#section-6.1
+    // since the RFC contradicts itself in quite some places...
+    if(rreq->destination_address > routing_table[linkaddr_node_addr.u8[0]].sequence_number) {
+        routing_table[linkaddr_node_addr.u8[0]].sequence_number = rreq->destination_address;
+    }
+
     static AodvRrep rrep;
 
-    rrep.hop_count = hop_count_init;
+    rrep.hop_count = 0;
     rrep.source_address = rreq->source_address;
     rrep.destination_address = rreq->destination_address;
-    rrep.destination_sequence_number = destination_sequence_number;
+    rrep.destination_sequence_number = routing_table[linkaddr_node_addr.u8[0]].sequence_number;
 
     return aodv_send_rrep(uc, &rrep);
 }
