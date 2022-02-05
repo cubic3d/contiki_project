@@ -6,7 +6,7 @@ ifndef TARGET
 TARGET=sky
 endif
 
-PROJECT_SOURCEFILES+=aodv.c
+PROJECT_SOURCEFILES+=aodv.c data.c
 
 all: project.sky
 
