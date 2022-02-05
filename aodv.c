@@ -218,12 +218,12 @@ void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq) {
 
             if(sequence_diff > 0) {
                 update = true;
-                printf("Added route to %d via %d, reason: newer sequence number\n", rreq->source_address, from);
+                printf("Updated route to %d via %d, reason: newer sequence number\n", rreq->source_address, from);
             } else if(sequence_diff == 0) {
                 // Equal sequence, compare distance and update if new is lower
                 if(AODV_RREQ_TTL - rreq->ttl + 1 < routing_table[rreq->source_address].distance) {
                     update = true;
-                    printf("Added route to %d via %d, reason: shorter distance\n", rreq->source_address, from);
+                    printf("Updated route to %d via %d, reason: shorter distance\n", rreq->source_address, from);
                 } else {
                     update = false;
                 }
@@ -232,7 +232,7 @@ void aodv_routing_table_update_source(uint8_t from, AodvRreq *rreq) {
             }
         } else {
             update = true;
-            printf("Added route to %d via %d, reason: invalid sequence number\n", rreq->source_address, from);
+            printf("Updated route to %d via %d, reason: invalid sequence number\n", rreq->source_address, from);
         }
     } else {
         update = true;
