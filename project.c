@@ -70,7 +70,9 @@ unicast_recv(struct unicast_conn *c, const linkaddr_t *from) {
 
     // Handle packet depending on its type
     switch(*data) {
-        case RREQ:
+        case RREP:;
+            static AodvRrep *rrep;
+            rrep = aodv_receive_rrep(data);
             break;
 
         default:
