@@ -148,12 +148,33 @@ static const struct unicast_callbacks unicast_cb = {unicast_recv};
 
 // Handle incomming reliable unicast packets.
 static void runicast_recv(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno) {
-    printf("Recv DATA: From: %d", from->u8[0]);
+    static uint8_t *data;
+    data = (uint8_t *)packetbuf_dataptr();
+
+    // Handle packet depending on its type
+    switch(*data) {
+        case PING:;
+            static DataPing *ping;
+            ping = data_receive_ping(data);
+
+            // Check if the ping is for us
+            if(ping->destination_address == linkaddr_node_addr.u8[0]) {
+                // Just be a proud receiver and tell it ;)
+                printf("We got a PING from %d yay!\n", ping->source_address);
+                break;
+            }
+
+            // Forward
+            data_send_ping(&runicast, ping);
+
+            break;
+
+        default:
+            printf("Received unknown packet type %d", data[0]);
+    }
 }
 
-static void runicast_sent(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions) {
-    printf("Recv DATA-ACK: From: %d | Retries: %d", to->u8[0], retransmissions);
-}
+static void runicast_sent(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions) {}
 
 static void runicast_timedout(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions) {
     printf("Fail DATA: To: %d | Retries: %d", to->u8[0], retransmissions);
