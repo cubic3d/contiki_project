@@ -176,7 +176,7 @@ void aodv_print_rrep(const char* action, AodvRrep *rrep) {
         rrep->destination_sequence_number);
 }
 
-int aodv_send_rerr(struct broadcast_conn *bc, AodvRerr *rerr) {
+int aodv_send_rerr(struct unicast_conn *uc, AodvRerr *rerr) {
     static uint8_t buffer[sizeof(AodvRerr) + 1];
 
     buffer[0] = RERR;
@@ -184,17 +184,32 @@ int aodv_send_rerr(struct broadcast_conn *bc, AodvRerr *rerr) {
     buffer[2] = rerr->destination_sequence_number;
 
     packetbuf_copyfrom(buffer, sizeof(buffer));
-    aodv_print_rerr("Send", rerr);
-    return broadcast_send(bc);
+
+    // For simplicity, this will send the packet not only to precursors (we don't track them)
+    // but to every known route with a known sequence number.
+    static uint8_t i = 0;
+    for(i = 0; i < AODV_RT_SIZE; i++) {
+        if(routing_table[i].in_use && routing_table[i].known_sequence_number) {
+            static linkaddr_t addr;
+            addr.u8[0] = routing_table[i].next_hop;
+            addr.u8[1] = 0;
+
+            packetbuf_copyfrom(buffer, sizeof(buffer));
+            aodv_print_rerr("Send", rerr);
+            unicast_send(uc, &addr);
+        }
+    }
+
+    return 1;
 }
 
-int aodv_send_rerr2(struct broadcast_conn *bc, uint8_t destination_address, uint8_t destination_sequence_number) {
+int aodv_send_rerr2(struct unicast_conn *uc, uint8_t destination_address, uint8_t destination_sequence_number) {
     static AodvRerr rerr;
 
     rerr.destination_address = destination_address;
     rerr.destination_sequence_number = destination_sequence_number;
 
-    return aodv_send_rerr(bc, &rerr);
+    return aodv_send_rerr(uc, &rerr);
 }
 
 AodvRerr *aodv_receive_rerr(uint8_t *data) {

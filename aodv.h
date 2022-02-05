@@ -58,8 +58,8 @@ int aodv_send_rrep_as_intermediate(struct unicast_conn *uc, AodvRreq *rreq);
 AodvRrep *aodv_receive_rrep(uint8_t *data);
 void aodv_print_rrep(const char* action, AodvRrep *rrep);
 
-int aodv_send_rerr(struct broadcast_conn *bc, AodvRerr *rerr);
-int aodv_send_rerr2(struct broadcast_conn *bc, uint8_t destination_address, uint8_t destination_sequence_number);
+int aodv_send_rerr(struct unicast_conn *uc, AodvRerr *rerr);
+int aodv_send_rerr2(struct unicast_conn *uc, uint8_t destination_address, uint8_t destination_sequence_number);
 AodvRerr *aodv_receive_rerr(uint8_t *data);
 void aodv_print_rerr(const char* action, AodvRerr *rerr);
 
