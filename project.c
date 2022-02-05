@@ -186,7 +186,10 @@ PROCESS_THREAD(init, ev, data) {
             static uint8_t destination_sequence_number;
             destination_sequence_number = atoi(strtok(NULL, " "));
 
-            aodv_send_rerr2(&unicast, 0, destination_address, destination_sequence_number);
+            // Invalidate route if we have it and if done so, notify other neigbors of the stale route
+            if(aodv_routing_table_remove_stale_route(destination_address, destination_sequence_number)) {
+                aodv_send_rerr2(&unicast, 0, destination_address, destination_sequence_number);
+            }
         }
     }
 
