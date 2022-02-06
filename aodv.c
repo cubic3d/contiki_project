@@ -230,7 +230,12 @@ void aodv_initiate_rerr(struct unicast_conn *uc, uint8_t destination_address) {
     }
 
     // Additionally make sure the route is also removed if it was direct as initiator
-    routing_table[destination_address].in_use = false;
+    if(routing_table[destination_address].in_use) {
+        routing_table[destination_address].in_use = false;
+        printf("Removed route to %d via %d, reason: direct route stale\n",
+            destination_address,
+            routing_table[destination_address].next_hop);
+    }
 }
 
 AodvRerr *aodv_receive_rerr(uint8_t *data) {
