@@ -219,7 +219,7 @@ int aodv_send_rerr2(struct unicast_conn *uc,
     return aodv_send_rerr(uc, exclude_address, &rerr);
 }
 
-int aodv_initiate_rerr(struct unicast_conn *uc, uint8_t destination_address) {
+void aodv_initiate_rerr(struct unicast_conn *uc, uint8_t destination_address) {
     // Invalidate route if we have it and if done so, notify other neigbors of the stale route
     static uint8_t sequence_number;
     // Increment sequence number according to RFC as we are who discovered the stale route
@@ -228,6 +228,9 @@ int aodv_initiate_rerr(struct unicast_conn *uc, uint8_t destination_address) {
     if(aodv_routing_table_remove_stale_route(destination_address, sequence_number)) {
         aodv_send_rerr2(uc, 0, destination_address, sequence_number);
     }
+
+    // Additionally make sure the route is also removed if it was direct as initiator
+    routing_table[destination_address].in_use = false;
 }
 
 AodvRerr *aodv_receive_rerr(uint8_t *data) {
