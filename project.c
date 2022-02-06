@@ -177,7 +177,10 @@ static void runicast_recv(struct runicast_conn *c, const linkaddr_t *from, uint8
 static void runicast_sent(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions) {}
 
 static void runicast_timedout(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions) {
-    printf("Fail DATA: To: %d | Retries: %d\n", to->u8[0], retransmissions);
+    printf("Timeout sending DATA: To: %d | Retries: %d\n", to->u8[0], retransmissions);
+
+    // Initiate RERR handling
+    aodv_initiate_rerr(&unicast, to->u8[0]);
 }
 static const struct runicast_callbacks runicast_callbacks = {runicast_recv, runicast_sent, runicast_timedout};
 
@@ -222,13 +225,8 @@ PROCESS_THREAD(init, ev, data) {
             static uint8_t destination_address;
             destination_address = atoi(strtok(NULL, " "));
 
-            static uint8_t destination_sequence_number;
-            destination_sequence_number = atoi(strtok(NULL, " "));
-
             // Invalidate route if we have it and if done so, notify other neigbors of the stale route
-            if(aodv_routing_table_remove_stale_route(destination_address, destination_sequence_number)) {
-                aodv_send_rerr2(&unicast, 0, destination_address, destination_sequence_number);
-            }
+            aodv_initiate_rerr(&unicast, destination_address);
         } else if(strcmp(command, "ping") == 0) {
             // Send an example data packet to a node
             static uint8_t destination_address;
