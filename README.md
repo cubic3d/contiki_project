@@ -1,4 +1,4 @@
-# AODV (Ad hoc On Demand Diatance Vector) Demonstration
+# AODV *(Ad hoc On Demand Diatance Vector)* Demonstration on Contiki in Cooja
 This is a conceptial implementation of AODV for the sky Mote simulated on Cooja.
 The implementation does not strictly stick to RFC 3561 and is made for presentation purposes.
 
