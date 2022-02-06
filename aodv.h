@@ -63,6 +63,7 @@ int aodv_send_rerr2(struct unicast_conn *uc,
     uint8_t exclude_address,
     uint8_t destination_address,
     uint8_t destination_sequence_number);
+int aodv_initiate_rerr(struct unicast_conn *uc, uint8_t destination_address);
 AodvRerr *aodv_receive_rerr(uint8_t *data);
 void aodv_print_rerr(const char* action, AodvRerr *rerr);
 
